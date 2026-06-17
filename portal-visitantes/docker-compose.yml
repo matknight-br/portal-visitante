@@ -1,0 +1,27 @@
+volumes:
+  logs_apache:
+
+networks:
+  rede:
+    external: true
+
+services:
+  portal-visitantes:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: portal_visitantes
+    restart: unless-stopped
+    ports:
+      # Expõe o portal na porta 8080 do servidor host
+      # (Você pode mudar "8080" para qualquer porta livre no seu servidor)
+      - "8086:80"
+    volumes:
+      # Mapeia a pasta ./src (onde está o index.php) para dentro do container
+      - ./src:/var/www/html
+      - logs_apache:/var/log/apache2
+    environment:
+      # Define o fuso horário para o registro de log e data da LGPD ficarem corretos
+      - TZ=America/Campo_Grande
+    networks:
+      - rede
