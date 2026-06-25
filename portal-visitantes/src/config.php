@@ -10,13 +10,23 @@ $app_config = [
     'syslog_port'  => 514
 ];
 
-// 2. CONFIGURAÇÕES LDAP (LLDAP)
+/* // 2. CONFIGURAÇÕES LDAP (LLDAP)
 $ldap_config = [
     'host'        => 'ldap://lldap-server',
     'port'        => 3890,
     'admin_dn'    => 'uid=admin,ou=people,dc=visitantes,dc=local',
     'admin_pass'  => 'password_lldap_adm',
     'base_dn'     => 'dc=visitantes,dc=empresa,dc=local'
+];
+ */
+
+// 2. CONFIGURAÇÕES DO BANCO DE DADOS (MySQL/MariaDB)
+$db_config = [
+    'host'    => 'portal_db', // Nome do contêiner no docker-compose
+    'dbname'  => 'portal_visitantes',
+    'user'    => 'portal_user',
+    'pass'    => 'senha_segura_123',
+    'charset' => 'utf8mb4'
 ];
 
 // 3. CONFIGURAÇÕES OMADA

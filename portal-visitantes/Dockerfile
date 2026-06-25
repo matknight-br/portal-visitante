@@ -10,6 +10,7 @@ RUN apt-get update -o Acquire::ForceIPv4=true \
     && apt-get install -y -o Acquire::ForceIPv4=true --no-install-recommends \
     libldap2-dev \
     libcurl4-openssl-dev \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Configura e instala as extensões LDAP e cURL no PHP

@@ -27,4 +27,4 @@ require_once 'config.php';
 
 // Ajusta variáveis globais baseadas na sessão
 $omada_config['site'] = (!empty($omadaSite) && $omadaSite !== 'default') ? $omadaSite : 'default';
-$ldap_uri = "{$ldap_config['host']}:{$ldap_config['port']}";
+//$ldap_uri = "{$ldap_config['host']}:{$ldap_config['port']}";

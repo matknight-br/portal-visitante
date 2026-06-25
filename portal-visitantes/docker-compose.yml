@@ -21,5 +21,7 @@ services:
     environment:
       # Define o fuso horário para o registro de log e data da LGPD ficarem corretos
       - TZ=America/Campo_Grande
+    env_file:
+      - .env
     networks:
       - rede

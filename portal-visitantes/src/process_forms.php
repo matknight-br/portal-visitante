@@ -2,32 +2,41 @@
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_form = $_POST['tipo_form'] ?? '';
 
+    // Conexão com o Banco de Dados (PDO)
+    try {
+        $dsn = "mysql:host={$db_config['host']};dbname={$db_config['dbname']};charset={$db_config['charset']}";
+        $pdo = new PDO($dsn, $db_config['user'], $db_config['pass'], [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]);
+    } catch (PDOException $e) {
+        error_log("Erro de conexão DB: " . $e->getMessage());
+        $mensagem = "<div class='error'>❌ Servidor de banco de dados temporariamente indisponível.</div>";
+        $tipo_form = ''; // Aborta o fluxo
+    }
+
     // --- FLUXO DE LOGIN ---
     if ($tipo_form == 'login') {
         $cpf = preg_replace('/[^0-9]/', '', $_POST['login_cpf']);
-        $senha = preg_replace('/[^0-9.-]/', '', trim($_POST['login_senha'])); 
+        $senha = $_POST['login_senha']; 
 
-        $ldap_conn = @ldap_connect($ldap_uri);
-        if ($ldap_conn) {
-            ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-            $user_dn = "uid={$cpf},ou=people,{$ldap_config['base_dn']}";
+        $stmt = $pdo->prepare("SELECT nome, senha_hash FROM usuarios WHERE cpf = ?");
+        $stmt->execute([$cpf]);
+        $usuario = $stmt->fetch();
 
-            if (@ldap_bind($ldap_conn, $user_dn, $senha)) {
-                $debug = "";
-                if (autorizarNaOmada($clientMac, $omada_config, $debug, $cpf)) {
-                    notificarFirewall($cpf, $clientMac, $_SESSION['clientIp'] ?? '', $app_config);
-                    
-                    $script_redirect = "<script>setTimeout(function(){ window.location.href = '{$app_config['landing_page']}'; }, 2000);</script>";
-                    $mensagem = "<div class='success'>✅ Acesso liberado. Redirecionando...</div>" . $script_redirect;
-                } else {
-                    $mensagem = "<div class='error'>❌ Erro na Rede: $debug</div>";
-                }
+        // password_verify cruza a senha digitada com o Hash seguro do banco
+        if ($usuario && password_verify($senha, $usuario['senha_hash'])) {
+            $debug = "";
+            if (autorizarNaOmada($clientMac, $omada_config, $debug, $cpf)) {
+                notificarFirewall($cpf, $clientMac, $_SESSION['clientIp'] ?? '', $app_config);
+                
+                $script_redirect = "<script>setTimeout(function(){ window.location.href = '{$app_config['landing_page']}'; }, 2000);</script>";
+                $mensagem = "<div class='success'>✅ Bem-vindo(a), {$usuario['nome']}! Conexão liberada.</div>" . $script_redirect;
             } else {
-                $mensagem = "<div class='error'>❌ CPF ou Senha incorretos.</div>";
+                $mensagem = "<div class='error'>❌ Erro na Rede: $debug</div>";
             }
-            ldap_close($ldap_conn);
         } else {
-            $mensagem = "<div class='error'>❌ Servidor de autenticação indisponível.</div>";
+            $mensagem = "<div class='error'>❌ CPF ou Senha incorretos.</div>";
         }
     }
 
@@ -38,55 +47,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST['email']);
         $erro_serpro = "";
 
-        // 1. Barreiras de Identidade (Matemática e Oficial Governo)
+        // 1. Barreiras de Identidade
         if (!isCpfValido($cpf)) {
             $mensagem = "<div class='error'>❌ CPF inválido. Verifique os números.</div>";
         } elseif (!validarCpfNaReceita($cpf, $nome, $serpro_config, $erro_serpro)) {
             $mensagem = "<div class='error'>❌ {$erro_serpro}</div>";
         } else {
-            // 2. Cadastro no LDAP
-            $ldap_conn = @ldap_connect($ldap_uri);
-            if ($ldap_conn) {
-                ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+            // 2. Verifica se já existe
+            $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE cpf = ?");
+            $stmt->execute([$cpf]);
+            
+            if ($stmt->fetch()) {
+                $mensagem = "<div class='error'>❌ Este CPF já possui cadastro. Use a aba de Login ou recupere a senha.</div>";
+            } else {
+                // 3. Cadastra no Banco (A senha inicial é o próprio CPF criptografado)
+                $senha_hash = password_hash($cpf, PASSWORD_DEFAULT);
                 
-                if (@ldap_bind($ldap_conn, $ldap_config['admin_dn'], $ldap_config['admin_pass'])) {
-                    $partes_nome = explode(" ", $nome, 2);
-                    $sobrenome = $partes_nome[1] ?? $partes_nome[0];
-
-                    $novo_usuario = [
-                        "objectclass" => ["top", "person", "organizationalPerson", "inetOrgPerson"],
-                        "cn" => $nome,
-                        "sn" => $sobrenome,
-                        "uid" => $cpf,
-                        "mail" => $email
-                    ];
-    
-                    $user_dn = "uid={$cpf},ou=people,{$ldap_config['base_dn']}";
-                    $adicionado = @ldap_add($ldap_conn, $user_dn, $novo_usuario);
-                    $ja_existe = (ldap_errno($ldap_conn) == 68);
-
-                    if ($adicionado || $ja_existe) {
-                        // Criptografa a senha (RFC 3062) definindo o próprio CPF como senha inicial
-                        $senha_definida = @ldap_exop_passwd($ldap_conn, $user_dn, "", $cpf);
-
-                        if ($senha_definida) {
-                            $debug = "";
-                            if (autorizarNaOmada($clientMac, $omada_config, $debug, $cpf)) {
-                                notificarFirewall($cpf, $clientMac, $_SESSION['clientIp'] ?? '', $app_config);
-                                
-                                $script_redirect = "<script>setTimeout(function(){ window.location.href = '{$app_config['landing_page']}'; }, 2000);</script>";
-                                $mensagem = "<div class='success'>✅ Cadastro realizado e conexão liberada!</div>" . $script_redirect;
-                            } else {
-                                $mensagem = "<div class='error'>❌ Cadastrado, mas erro na rede: $debug</div>";
-                            }
-                        } else {
-                            $mensagem = "<div class='error'>❌ Falha ao processar senha.</div>";
-                        }
+                $stmt = $pdo->prepare("INSERT INTO usuarios (cpf, nome, email, senha_hash) VALUES (?, ?, ?, ?)");
+                
+                if ($stmt->execute([$cpf, $nome, $email, $senha_hash])) {
+                    $debug = "";
+                    if (autorizarNaOmada($clientMac, $omada_config, $debug, $cpf)) {
+                        notificarFirewall($cpf, $clientMac, $_SESSION['clientIp'] ?? '', $app_config);
+                        
+                        $script_redirect = "<script>setTimeout(function(){ window.location.href = '{$app_config['landing_page']}'; }, 2000);</script>";
+                        $mensagem = "<div class='success'>✅ Cadastro realizado e conexão liberada!</div>" . $script_redirect;
                     } else {
-                        $mensagem = "<div class='error'>❌ Falha ao criar usuário.</div>";
+                        $mensagem = "<div class='error'>❌ Cadastrado com sucesso, mas ocorreu um erro ao liberar a rede: $debug</div>";
                     }
+                } else {
+                    $mensagem = "<div class='error'>❌ Erro interno ao gravar usuário.</div>";
                 }
-                ldap_close($ldap_conn);
             }
         }
     }
@@ -104,21 +95,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } elseif (strlen($nova_senha) < 6) {
             $mensagem = "<div class='error'>❌ A senha deve ter no mínimo 6 caracteres.</div>";
         } else {
-            $ldap_conn = @ldap_connect($ldap_uri);
-            if ($ldap_conn) {
-                ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-                $user_dn = "uid={$cpf},ou=people,{$ldap_config['base_dn']}";
+            // Verifica a identidade atual
+            $stmt = $pdo->prepare("SELECT senha_hash FROM usuarios WHERE cpf = ?");
+            $stmt->execute([$cpf]);
+            $usuario = $stmt->fetch();
 
-                if (@ldap_bind($ldap_conn, $user_dn, $senha_atual)) {
-                    if (@ldap_exop_passwd($ldap_conn, $user_dn, $senha_atual, $nova_senha)) {
-                        $mensagem = "<div class='success'>✅ Senha alterada! Faça login com a nova senha.</div>";
-                    } else {
-                        $mensagem = "<div class='error'>❌ Erro interno ao alterar a senha.</div>";
-                    }
+            if ($usuario && password_verify($senha_atual, $usuario['senha_hash'])) {
+                // Atualiza para a nova senha
+                $novo_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
+                $stmt_update = $pdo->prepare("UPDATE usuarios SET senha_hash = ? WHERE cpf = ?");
+                
+                if ($stmt_update->execute([$novo_hash, $cpf])) {
+                    $mensagem = "<div class='success'>✅ Senha alterada! Use a aba Login para se conectar à rede.</div>";
                 } else {
-                    $mensagem = "<div class='error'>❌ CPF ou Senha Atual incorretos.</div>";
+                    $mensagem = "<div class='error'>❌ Erro interno ao alterar a senha.</div>";
                 }
-                ldap_close($ldap_conn);
+            } else {
+                $mensagem = "<div class='error'>❌ CPF não encontrado ou Senha Atual incorreta.</div>";
             }
         }
     }

@@ -40,10 +40,10 @@ require_once 'process_forms.php';
 
 <div class="container">
     <div class="text-center">
-        <img src="logo.png" alt="Logotipo <?= htmlspecialchars($app_config['nome_empresa']) ?>" class="logo">
+        <img src="mg_logo.png" alt="Logotipo <?= htmlspecialchars($app_config['nome_empresa']) ?>" class="logo">
         
         <h2>Acesso Wi-Fi</h2>
-        <p class="subtitle">Portal de Visitantes</p>
+        <p class="subtitle">Portal Cativo de Visitantes</p>
     </div>
 
     <?php if(!empty($mensagem)) echo $mensagem; ?>
@@ -51,7 +51,7 @@ require_once 'process_forms.php';
     <div class="tabs">
         <a href="<?= urlAba('login') ?>" class="<?= $acao == 'login' ? 'active' : '' ?>">Login</a>
         <a href="<?= urlAba('cadastro') ?>" class="<?= $acao == 'cadastro' ? 'active' : '' ?>">Cadastro</a>
-        <a href="<?= urlAba('trocar_senha') ?>" class="<?= $acao == 'trocar_senha' ? 'active' : '' ?>">Senha</a>
+        <a href="<?= urlAba('trocar_senha') ?>" class="<?= $acao == 'trocar_senha' ? 'active' : '' ?>">Trocar Senha</a>
     </div>
 
     <?php if ($acao == 'login'): ?>
@@ -94,11 +94,11 @@ require_once 'process_forms.php';
             
             <label>Senha Atual:</label>
             <div class="password-wrapper">
-                <input type="password" name="senha_atual" id="senha_atual" required placeholder="Senha atual ou CPF">
+                <input type="password" name="senha_atual" id="senha_atual" required placeholder="Senha atual">
                 <span class="toggle-password" onclick="alternarSenha('senha_atual', this)">👁️</span>
             </div>
             
-            <label>Nova Senha (Mín. 6 caracteres):</label>
+            <label>Nova Senha (Mín. 8 caracteres):</label>
             <div class="password-wrapper">
                 <input type="password" name="nova_senha" id="nova_senha" required placeholder="Nova senha segura">
                 <span class="toggle-password" onclick="alternarSenha('nova_senha', this)">👁️</span>
