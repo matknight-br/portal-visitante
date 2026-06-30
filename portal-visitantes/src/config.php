@@ -4,28 +4,18 @@
 
 // 1. CONFIGURAÇÕES GERAIS DO PORTAL
 $app_config = [
-    'nome_empresa' => 'Unimed Campo Grande',
+    'nome_empresa' => 'Matheus Guerreiro',
     'landing_page' => 'https://www.google.com.br', // Para onde o usuário vai após conectar
     'syslog_ip'    => 'ip_firewall',                 // IP do Firewall
     'syslog_port'  => 514
 ];
 
-/* // 2. CONFIGURAÇÕES LDAP (LLDAP)
-$ldap_config = [
-    'host'        => 'ldap://lldap-server',
-    'port'        => 3890,
-    'admin_dn'    => 'uid=admin,ou=people,dc=visitantes,dc=local',
-    'admin_pass'  => 'password_lldap_adm',
-    'base_dn'     => 'dc=visitantes,dc=empresa,dc=local'
-];
- */
-
 // 2. CONFIGURAÇÕES DO BANCO DE DADOS (MySQL/MariaDB)
 $db_config = [
-    'host'    => 'portal_db', // Nome do contêiner no docker-compose
-    'dbname'  => 'portal_visitantes',
-    'user'    => 'portal_user',
-    'pass'    => 'senha_segura_123',
+    'host'    => 'sql101.infinityfree.com', // Nome do contêiner no docker-compose
+    'dbname'  => 'if0_42215181_portal_visitantes',
+    'user'    => 'if0_42215181',
+    'pass'    => 'E4RaGrdZcvH4',
     'charset' => 'utf8mb4'
 ];
 

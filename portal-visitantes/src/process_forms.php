@@ -44,6 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     elseif ($tipo_form == 'cadastro') {
         $nome = trim($_POST['nome_completo']);
         $cpf = preg_replace('/[^0-9]/', '', $_POST['cpf']);
+        $senha = $_POST['senha'];
         $email = trim($_POST['email']);
         $erro_serpro = "";
 
@@ -61,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mensagem = "<div class='error'>❌ Este CPF já possui cadastro. Use a aba de Login ou recupere a senha.</div>";
             } else {
                 // 3. Cadastra no Banco (A senha inicial é o próprio CPF criptografado)
-                $senha_hash = password_hash($cpf, PASSWORD_DEFAULT);
+                $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
                 
                 $stmt = $pdo->prepare("INSERT INTO usuarios (cpf, nome, email, senha_hash) VALUES (?, ?, ?, ?)");
                 

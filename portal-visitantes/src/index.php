@@ -73,10 +73,12 @@ require_once 'process_forms.php';
             <label>Nome Completo:</label>
             <input type="text" name="nome_completo" required placeholder="Como consta no documento">
             <label>CPF:</label>
-            <input type="text" name="cpf" required maxlength="11" pattern="\d*" inputmode="numeric" placeholder="Sua senha inicial será o próprio CPF">
-            <label>E-mail Corporativo / Pessoal:</label>
-            <input type="email" name="email" required placeholder="seu@email.com">
-
+            <input type="text" name="cpf" required maxlength="11" pattern="\d*" inputmode="numeric" placeholder="Somente números">
+            <label>Senha:</label>
+            <div class="password-wrapper">
+                <input type="password" name="senha" id="senha" required placeholder="Senha segura (mín. 8 caracteres)">
+                <span class="toggle-password" onclick="alternarSenha('senha', this)">👁️</span>
+            </div>
             <div class="lgpd-box">
                 <label style="font-weight: normal; cursor: pointer; margin-top: 0;">
                     <input type="checkbox" name="lgpd" required style="width: auto; margin: 0 10px 0 0;">
