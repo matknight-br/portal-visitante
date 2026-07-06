@@ -2,9 +2,9 @@
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_form = $_POST['tipo_form'] ?? '';
 
-    // Conexão com o Banco de Dados (PDO)
+    // Conexão com o Banco de Dados (PDO - PostgreSQL/Supabase)
     try {
-        $dsn = "mysql:host={$db_config['host']};dbname={$db_config['dbname']};charset={$db_config['charset']}";
+        $dsn = "pgsql:host={$db_config['host']};port={$db_config['port']};dbname={$db_config['dbname']}";
         $pdo = new PDO($dsn, $db_config['user'], $db_config['pass'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
