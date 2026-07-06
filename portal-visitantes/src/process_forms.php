@@ -2,9 +2,9 @@
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo_form = $_POST['tipo_form'] ?? '';
 
-    // Conexão com o Banco de Dados (PDO - PostgreSQL/Supabase)
+    // Conexão com o Banco de Dados (PDO - MySQL/MariaDB)
     try {
-        $dsn = "pgsql:host={$db_config['host']};port={$db_config['port']};dbname={$db_config['dbname']}";
+        $dsn = "mysql:host={$db_config['host']};dbname={$db_config['dbname']};charset={$db_config['charset']}";
         $pdo = new PDO($dsn, $db_config['user'], $db_config['pass'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // --- FLUXO DE LOGIN ---
     if ($tipo_form == 'login') {
         $cpf = preg_replace('/[^0-9]/', '', $_POST['login_cpf']);
-        $senha = $_POST['login_senha']; 
+        $senha = $_POST['login_senha'];
 
         $stmt = $pdo->prepare("SELECT nome, senha_hash FROM usuarios WHERE cpf = ?");
         $stmt->execute([$cpf]);
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $debug = "";
             if (autorizarNaOmada($clientMac, $omada_config, $debug, $cpf)) {
                 notificarFirewall($cpf, $clientMac, $_SESSION['clientIp'] ?? '', $app_config);
-                
+
                 $script_redirect = "<script>setTimeout(function(){ window.location.href = '{$app_config['landing_page']}'; }, 2000);</script>";
                 $mensagem = "<div class='success'>✅ Bem-vindo(a), {$usuario['nome']}! Conexão liberada.</div>" . $script_redirect;
             } else {
@@ -57,20 +57,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // 2. Verifica se já existe
             $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE cpf = ?");
             $stmt->execute([$cpf]);
-            
+
             if ($stmt->fetch()) {
                 $mensagem = "<div class='error'>❌ Este CPF já possui cadastro. Use a aba de Login ou recupere a senha.</div>";
             } else {
                 // 3. Cadastra no Banco (A senha inicial é o próprio CPF criptografado)
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
-                
+
                 $stmt = $pdo->prepare("INSERT INTO usuarios (cpf, nome, email, senha_hash) VALUES (?, ?, ?, ?)");
-                
+
                 if ($stmt->execute([$cpf, $nome, $email, $senha_hash])) {
                     $debug = "";
                     if (autorizarNaOmada($clientMac, $omada_config, $debug, $cpf)) {
                         notificarFirewall($cpf, $clientMac, $_SESSION['clientIp'] ?? '', $app_config);
-                        
+
                         $script_redirect = "<script>setTimeout(function(){ window.location.href = '{$app_config['landing_page']}'; }, 2000);</script>";
                         $mensagem = "<div class='success'>✅ Cadastro realizado e conexão liberada!</div>" . $script_redirect;
                     } else {
@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Atualiza para a nova senha
                 $novo_hash = password_hash($nova_senha, PASSWORD_DEFAULT);
                 $stmt_update = $pdo->prepare("UPDATE usuarios SET senha_hash = ? WHERE cpf = ?");
-                
+
                 if ($stmt_update->execute([$novo_hash, $cpf])) {
                     $mensagem = "<div class='success'>✅ Senha alterada! Use a aba Login para se conectar à rede.</div>";
                 } else {
