@@ -239,10 +239,12 @@
     margin: 12px 0;
     font-size: 13px;
     color: var(--text);
+    line-height: 1.7;
   }
   .how-to-image strong { color: var(--primary); }
   ul { margin: 8px 0 0 20px; }
   li { margin-bottom: 4px; }
+  .bookmarklet-btn, .bookmarklet-zone { display: none; }
 </style>
 </head>
 <body>
@@ -257,7 +259,7 @@
 
   <div class="method-tabs">
     <div class="method-tab active" data-method="console">M&eacute;todo 1: Console do Navegador</div>
-    <div class="method-tab" data-method="bookmarklet">M&eacute;todo 2: Bot&atilde;o na Barra de Favoritos</div>
+    <div class="method-tab" data-method="bookmarklet">M&eacute;todo 2: Bot&atilde;o na Barra de Favoritos (recomendado)</div>
   </div>
 
   <!-- MÉTODO 1: CONSOLE -->
@@ -389,59 +391,77 @@
 
   <!-- MÉTODO 2: BOOKMARKLET -->
   <div class="method-panel" data-method="bookmarklet">
+    <div class="alert alert-info" style="margin-bottom: 24px;">
+      <strong>O que &eacute; este m&eacute;todo?</strong> Voc&ecirc; vai criar um bot&atilde;o na barra de favoritos do navegador. Depois, toda vez que abrir uma prova no Google Drive, basta clicar nesse bot&atilde;o para baixar o PDF completo. Voc&ecirc; s&oacute; precisa fazer a instala&ccedil;&atilde;o uma &uacute;nica vez.
+    </div>
+
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-content">
-        <p>Exiba a barra de favoritos no seu navegador</p>
-        <span class="hint">No Chrome: clique nos 3 pontos (menu) &gt; Favoritos &gt; "Mostrar barra de favoritos". Ou pressione <kbd>Ctrl+Shift+B</kbd>.</span>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <p>Arraste o bot&atilde;o verde abaixo at&eacute; a barra de favoritos</p>
-        <span class="hint">Clique e segure no bot&atilde;o, depois arraste para a barra de favoritos no topo do navegador. Ele vai aparecer l&aacute; como um favorito.</span>
+        <p>Mostre a barra de favoritos do navegador</p>
+        <span class="hint">A barra de favoritos &eacute; aquela faixa branca logo abaixo do endere&ccedil;o do site, onde ficam os sites que voc&ecirc; salva. Se ela n&atilde;o estiver vis&iacute;vel:</span>
+        <div class="how-to-image" style="margin-top: 10px;">
+          <strong>No Chrome:</strong> clique nos tr&ecirc;s pontos (&vellip;) no canto superior direito &gt; <strong>Favoritos</strong> &gt; marque <strong>Mostrar barra de favoritos</strong>.<br>
+          <strong>Atalho r&aacute;pido:</strong> pressione <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> no teclado.
+        </div>
       </div>
     </div>
 
-    <div class="bookmarklet-zone">
-      <a class="bookmarklet-btn" href="javascript:void((async function(){if(!window.jspdf){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';document.head.appendChild(s);await new Promise(r=>s.onload=r)}const{jsPDF}=window.jspdf;const u=new Set(),sl=ms=>new Promise(r=>setTimeout(r,ms));function c(){document.querySelectorAll('img').forEach(i=>{const s=i.src||'';if((s.includes('googleusercontent')||s.includes('lh3')||s.includes('ggpht'))&&i.naturalWidth>200)u.add(s)});document.querySelectorAll('[style*=&quot;background&quot;]').forEach(e=>{const b=getComputedStyle(e).backgroundImage;if(b&&b.includes('url(')){const m=b.match(/url\([&quot;'&#39;]?(.*?)\)[&quot;'&#39;]?/);if(m&&(m[1].includes('googleusercontent')||m[1].includes('lh3')))u.add(m[1])}})}const d=document.querySelector('.ndfHFb-c4YZDc-q77wJc')||document.querySelector('[role=document]')||document.body;let h=0;for(let i=0;i<300;i++){c();d.scrollBy(0,innerHeight*0.8);await sl(700);if(d.scrollHeight===h&&i>3)break;h=d.scrollHeight}d.scrollTo(0,0);await sl(500);c();const a=[...u].sort();const p=new jsPDF({unit:'px'});let f=true;for(let i=0;i<a.length;i++){try{const b=await fetch(a[i]).then(r=>r.blob());const du=await new Promise((rs,rj)=>{const fr=new FileReader();fr.onload=()=>rs(fr.result);fr.onerror=rj;fr.readAsDataURL(b)});const im=new Image();im.src=du;await new Promise(r=>im.onload=r);const w=im.naturalWidth,h2=im.naturalHeight;if(f){p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2);f=false}else{p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2)}}catch(e){}}if(p.getNumberOfPages()>1)p.deletePage(1);p.save('documento_baixado.pdf')})());">
-        &#128193; Baixar PDF do Drive
-      </a>
-      <p style="margin-top: 12px; font-size: 12px; color: var(--text-muted);">
-        Arraste este bot&atilde;o para a barra de favoritos
-      </p>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p>Crie um novo favorito qualquer na barra</p>
+        <span class="hint">Clique com o bot&atilde;o direito do mouse em qualquer espa&ccedil;o vazio da barra de favoritos e escolha <strong>"Adicionar p&aacute;gina..."</strong> (ou "Adicionar favorito"). Vai abrir uma janelinha.</span>
+      </div>
     </div>
 
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-content">
-        <p>Abra o PDF no Google Drive</p>
-        <span class="hint">Acesse o link do PDF e espere carregar por completo</span>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <p>Clique no favorito que voc&ecirc; criou</p>
-        <span class="hint">O script vai rolar o documento sozinho, baixar as p&aacute;ginas e salvar o arquivo <strong>documento_baixado.pdf</strong> automaticamente. N&atilde;o feche a aba.</span>
+        <p>D&ecirc; um nome ao favorito</p>
+        <span class="hint">No campo <strong>Nome</strong>, digite: <strong>Baixar Prova</strong> (ou outro nome que voc&ecirc; queira). O nome n&atilde;o importa, &eacute; s&oacute; para voc&ecirc; identificar o bot&atilde;o.</span>
       </div>
     </div>
 
-    <div class="how-to-image">
-      <strong>N&atilde;o consegui arrastar?</strong> Como alternativa:
-      <ul>
-        <li>Clique com o bot&atilde;o direito na barra de favoritos e escolha "Adicionar p&aacute;gina..."</li>
-        <li>No campo <strong>Nome</strong>, digite: <strong>Baixar PDF do Drive</strong></li>
-        <li>Clique no bot&atilde;o "Copiar" abaixo, cole no campo <strong>URL</strong> e salve</li>
-      </ul>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <p>Cole o c&oacute;digo no campo URL e salve</p>
+        <span class="hint">No campo <strong>URL</strong> (ou endere&ccedil;o), apague tudo que estiver l&aacute;. Depois clique no bot&atilde;o "Copiar" aqui embaixo, volte para a janelinha do favorito, clique no campo URL e pressione <kbd>Ctrl</kbd> + <kbd>V</kbd> para colar. Por fim, clique em <strong>Salvar</strong> (ou <strong>Concluir</strong>).</span>
+      </div>
     </div>
 
     <div class="code-block">
       <button class="btn btn-copy" onclick="copyScript('bookmarklet-code', this)">Copiar</button>
       <pre id="bookmarklet-code">javascript:void((async function(){if(!window.jspdf){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';document.head.appendChild(s);await new Promise(r=>s.onload=r)}const{jsPDF}=window.jspdf;const u=new Set(),sl=ms=>new Promise(r=>setTimeout(r,ms));function c(){document.querySelectorAll('img').forEach(i=>{const s=i.src||'';if((s.includes('googleusercontent')||s.includes('lh3')||s.includes('ggpht'))&&i.naturalWidth>200)u.add(s)});document.querySelectorAll('[style*="background"]').forEach(e=>{const b=getComputedStyle(e).backgroundImage;if(b&&b.includes('url(')){const m=b.match(/url\(["']?(.*?)["']?\)/);if(m&&(m[1].includes('googleusercontent')||m[1].includes('lh3')))u.add(m[1])}})}const d=document.querySelector('.ndfHFb-c4YZDc-q77wJc')||document.querySelector('[role="document"]')||document.body;let h=0;for(let i=0;i<300;i++){c();d.scrollBy(0,innerHeight*0.8);await sl(700);if(d.scrollHeight===h&&i>3)break;h=d.scrollHeight}d.scrollTo(0,0);await sl(500);c();const a=[...u].sort();const p=new jsPDF({unit:'px'});let f=true;for(let i=0;i<a.length;i++){try{const b=await fetch(a[i]).then(r=>r.blob());const du=await new Promise((rs,rj)=>{const fr=new FileReader();fr.onload=()=>rs(fr.result);fr.onerror=rj;fr.readAsDataURL(b)});const im=new Image();im.src=du;await new Promise(r=>im.onload=r);const w=im.naturalWidth,h2=im.naturalHeight;if(f){p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2);f=false}else{p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2)}}catch(e){}}if(p.getNumberOfPages()>1)p.deletePage(1);p.save('documento_baixado.pdf')})());</pre>
     </div>
-    <span class="feedback" id="fb-bookmarklet-code">C&oacute;digo copiado!</span>
+    <span class="feedback" id="fb-bookmarklet-code">C&oacute;digo copiado! Agora cole no campo URL do favorito e salve.</span>
+
+    <div class="divider" style="margin: 24px 0;"></div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <p>Abra a prova no Google Drive</p>
+        <span class="hint">Acesse o link da prova que voc&ecirc; quer baixar e espere ela carregar por completo na tela.</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <p>Clique no favorito "Baixar Prova" que voc&ecirc; criou</p>
+        <span class="hint">O bot&atilde;o est&aacute; na barra de favoritos, no topo do navegador. Ao clicar, o script come&ccedil;a a rodar automaticamente: ele vai rolar a prova sozinho, p&aacute;gina por p&aacute;gina, e quando terminar vai salvar o arquivo <strong>documento_baixado.pdf</strong> na sua pasta de Downloads.</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <p>Espere terminar e pronto!</p>
+        <span class="hint">N&atilde;o feche a aba do navegador enquanto o script estiver rodando. Quando ele terminar, o PDF completo ser&aacute; baixado automaticamente. Para baixar outra prova no futuro, basta repetir os passos 5 e 6 &mdash; o favorito j&aacute; est&aacute; pronto.</span>
+      </div>
+    </div>
   </div>
 
   <div class="divider"></div>
