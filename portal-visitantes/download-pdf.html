@@ -8,6 +8,7 @@
   :root {
     --primary: #005C40;
     --primary-dark: #004433;
+    --primary-light: #e8f5ee;
     --bg: #f0f2f5;
     --card: #ffffff;
     --text: #1a1a1a;
@@ -32,7 +33,7 @@
   }
   .container {
     background: var(--card);
-    max-width: 680px;
+    max-width: 700px;
     width: 100%;
     padding: 40px;
     border-radius: 16px;
@@ -82,7 +83,7 @@
   .code-block pre {
     color: var(--code-text);
     font-family: 'Consolas', 'Monaco', monospace;
-    font-size: 12.5px;
+    font-size: 12px;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-all;
@@ -97,6 +98,8 @@
     font-size: 14px;
     font-weight: 600;
     transition: background 0.2s, transform 0.1s;
+    display: inline-block;
+    text-decoration: none;
   }
   .btn:hover { background: var(--primary-dark); }
   .btn:active { transform: scale(0.97); }
@@ -107,6 +110,40 @@
     padding: 6px 14px;
     font-size: 12px;
     border-radius: 6px;
+  }
+  .bookmarklet-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: grab;
+    border: 2px dashed transparent;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .bookmarklet-btn:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,92,64,0.3);
+  }
+  .bookmarklet-btn:active {
+    cursor: grabbing;
+    transform: scale(0.97);
+  }
+  .bookmarklet-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    text-align: center;
+    margin: 16px 0;
+    background: #fafafa;
   }
   .alert {
     padding: 14px 16px;
@@ -145,7 +182,7 @@
   }
   .method-tab {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     text-align: center;
     border: 2px solid var(--border);
     background: white;
@@ -159,7 +196,7 @@
   .method-tab.active {
     border-color: var(--primary);
     color: var(--primary);
-    background: #e8f5ee;
+    background: var(--primary-light);
   }
   .method-panel { display: none; }
   .method-panel.active { display: block; }
@@ -171,21 +208,56 @@
     font-size: 12px;
     font-family: monospace;
   }
+  .progress-bar {
+    display: none;
+    margin: 16px 0;
+  }
+  .progress-bar.show { display: block; }
+  .progress-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    width: 0%;
+    transition: width 0.3s;
+    border-radius: 4px;
+  }
+  .progress-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .how-to-image {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .how-to-image strong { color: var(--primary); }
+  ul { margin: 8px 0 0 20px; }
+  li { margin-bottom: 4px; }
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>Baixar PDF do Google Drive (Somente Leitura)</h1>
-  <p class="subtitle">Ferramenta para baixar PDFs que estão em modo visualização apenas</p>
+  <p class="subtitle">Baixe documentos que s&oacute; podem ser visualizados &mdash; o script junta tudo em um &uacute;nico PDF</p>
 
   <div class="alert alert-info">
-    Use esta ferramenta apenas em documentos que voc&ecirc; tem permiss&atilde;o leg&iacute;tima de visualiza&ccedil;&atilde;o. O conte&uacute;do j&aacute; est&aacute; vis&iacute;vel na sua tela &mdash; este script apenas salva localmente o que voc&ecirc; j&aacute; pode ver.
+    Use apenas em documentos que voc&ecirc; tem permiss&atilde;o leg&iacute;tima para visualizar. O conte&uacute;do j&aacute; est&aacute; vis&iacute;vel na sua tela &mdash; este script apenas salva localmente.
   </div>
 
   <div class="method-tabs">
-    <div class="method-tab active" data-method="console">M&eacute;todo 1: Console</div>
-    <div class="method-tab" data-method="bookmarklet">M&eacute;todo 2: Bookmarklet</div>
+    <div class="method-tab active" data-method="console">M&eacute;todo 1: Console do Navegador</div>
+    <div class="method-tab" data-method="bookmarklet">M&eacute;todo 2: Bot&atilde;o na Barra de Favoritos</div>
   </div>
 
   <!-- MÉTODO 1: CONSOLE -->
@@ -194,86 +266,125 @@
       <div class="step-num">1</div>
       <div class="step-content">
         <p>Abra o PDF no Google Drive</p>
-        <span class="hint">Acesse o link do PDF e aguarde carregar completamente</span>
+        <span class="hint">Acesse o link do PDF e espere ele carregar por completo na tela</span>
       </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-content">
         <p>Abra o Console do navegador</p>
-        <span class="hint">Pressione <kbd>F12</kbd> ou <kbd>Ctrl+Shift+J</kbd> (Chrome) / <kbd>Ctrl+Shift+K</kbd> (Firefox)</span>
+        <span class="hint">Pressione a tecla <kbd>F12</kbd> no teclado. Vai abrir um painel na tela. Clique na aba <strong>Console</strong>.</span>
       </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-content">
-        <p>Cole o script abaixo no Console e pressione <kbd>Enter</kbd></p>
-        <span class="hint">O script ir&aacute; rolar o documento, coletar todas as p&aacute;ginas e baix&aacute;-las como imagens PNG</span>
+        <p>Copie o script abaixo e cole no Console</p>
+        <span class="hint">Clique no bot&atilde;o "Copiar", depois clique dentro do Console e pressione <kbd>Ctrl+V</kbd></span>
       </div>
     </div>
 
     <div class="code-block">
       <button class="btn btn-copy" onclick="copyScript('console-script', this)">Copiar</button>
       <pre id="console-script">(async function(){
-  const urls = new Set();
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  /* Carrega a biblioteca jsPDF para gerar o PDF final */
+  if(!window.jspdf){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    document.head.appendChild(s);
+    await new Promise(r=>s.onload=r);
+  }
+  const{jsPDF}=window.jspdf;
 
-  function collect() {
-    document.querySelectorAll('img').forEach(img => {
-      const s = img.src || '';
-      if ((s.includes('googleusercontent') || s.includes('lh3') || s.includes('ggpht')) && img.naturalWidth > 200) {
+  const urls=new Set();
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+  function collect(){
+    document.querySelectorAll('img').forEach(img=>{
+      const s=img.src||'';
+      if((s.includes('googleusercontent')||s.includes('lh3')||s.includes('ggpht'))&&img.naturalWidth>200){
         urls.add(s);
       }
     });
-    document.querySelectorAll('[style*="background"]').forEach(el => {
-      const bg = getComputedStyle(el).backgroundImage;
-      if (bg && bg.includes('url(')) {
-        const m = bg.match(/url\(["']?(.*?)["']?\)/);
-        if (m && (m[1].includes('googleusercontent') || m[1].includes('lh3'))) urls.add(m[1]);
+    document.querySelectorAll('[style*="background"]').forEach(el=>{
+      const bg=getComputedStyle(el).backgroundImage;
+      if(bg&&bg.includes('url(')){
+        const m=bg.match(/url\(["']?(.*?)["']?\)/);
+        if(m&&(m[1].includes('googleusercontent')||m[1].includes('lh3')))urls.add(m[1]);
       }
     });
   }
 
-  const container = document.querySelector('.ndfHFb-c4YZDc-q77wJc')
-    || document.querySelector('[role="document"]')
-    || document.body;
-  let lastH = 0;
+  const container=document.querySelector('.ndfHFb-c4YZDc-q77wJc')
+    ||document.querySelector('[role="document"]')
+    ||document.body;
+  let lastH=0;
 
-  for (let i = 0; i < 200; i++) {
+  console.log('Rolando o documento... nao feche esta aba.');
+  for(let i=0;i<300;i++){
     collect();
-    container.scrollBy(0, window.innerHeight * 0.8);
+    container.scrollBy(0,window.innerHeight*0.8);
     await sleep(700);
-    if (container.scrollHeight === lastH && i > 3) break;
-    lastH = container.scrollHeight;
+    if(container.scrollHeight===lastH&&i>3)break;
+    lastH=container.scrollHeight;
   }
 
-  container.scrollTo(0, 0);
+  container.scrollTo(0,0);
   await sleep(500);
   collect();
 
-  const arr = [...urls].sort();
-  console.log('Encontradas ' + arr.length + ' paginas. Baixando...');
+  const arr=[...urls].sort();
+  console.log('Encontradas '+arr.length+' paginas. Baixando e montando o PDF...');
 
-  arr.forEach((url, i) => {
-    setTimeout(() => {
-      fetch(url).then(r => r.blob()).then(blob => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'pagina_' + String(i+1).padStart(3,'0') + '.png';
-        a.click();
-        URL.revokeObjectURL(a.href);
-      }).catch(() => {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'pagina_' + String(i+1).padStart(3,'0') + '.png';
-        a.target = '_blank';
-        a.click();
+  const pdf=new jsPDF({unit:'px',hotfixes:{px_scaling:1}});
+  let first=true;
+
+  for(let i=0;i<arr.length;i++){
+    try{
+      const blob=await fetch(arr[i]).then(r=>r.blob());
+      const dataUrl=await new Promise((res,rej)=>{
+        const fr=new FileReader();
+        fr.onload=()=>res(fr.result);
+        fr.onerror=rej;
+        fr.readAsDataURL(blob);
       });
-    }, i * 400);
-  });
+      const img=new Image();
+      img.src=dataUrl;
+      await new Promise(r=>img.onload=r);
+
+      const w=img.naturalWidth,h=img.naturalHeight;
+      if(first){
+        pdf.addPage([w,h],'png');
+        pdf.addImage(dataUrl,'PNG',0,0,w,h);
+        first=false;
+      }else{
+        pdf.addPage([w,h],'png');
+        pdf.addImage(dataUrl,'PNG',0,0,w,h);
+      }
+      console.log('Pagina '+(i+1)+' de '+arr.length+' processada.');
+    }catch(e){
+      console.warn('Falha na pagina '+(i+1)+': '+e.message);
+    }
+  }
+
+  /* Remove a primeira pagina em branco que o jsPDF cria automaticamente */
+  if(pdf.getNumberOfPages()>1){
+    pdf.deletePage(1);
+  }
+
+  pdf.save('documento_baixado.pdf');
+  console.log('Pronto! PDF salvo com '+arr.length+' paginas.');
 })();</pre>
     </div>
-    <span class="feedback" id="fb-console-script">Script copiado!</span>
+    <span class="feedback" id="fb-console-script">Script copiado! Agora cole no Console e pressione Enter.</span>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <p>Pressione <kbd>Enter</kbd> e espere</p>
+        <span class="hint">O script vai rolar o documento sozinho, baixar as p&aacute;ginas e montar um &uacute;nico arquivo <strong>documento_baixado.pdf</strong>. N&atilde;o feche a aba at&eacute; terminar.</span>
+      </div>
+    </div>
   </div>
 
   <!-- MÉTODO 2: BOOKMARKLET -->
@@ -281,35 +392,67 @@
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-content">
-        <p>Arraste o bot&atilde;o abaixo para a barra de favoritos do navegador</p>
-        <span class="hint">Crie um favorito e cole o c&oacute;digo no campo URL</span>
+        <p>Exiba a barra de favoritos no seu navegador</p>
+        <span class="hint">No Chrome: clique nos 3 pontos (menu) &gt; Favoritos &gt; "Mostrar barra de favoritos". Ou pressione <kbd>Ctrl+Shift+B</kbd>.</span>
       </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p>Arraste o bot&atilde;o verde abaixo at&eacute; a barra de favoritos</p>
+        <span class="hint">Clique e segure no bot&atilde;o, depois arraste para a barra de favoritos no topo do navegador. Ele vai aparecer l&aacute; como um favorito.</span>
+      </div>
+    </div>
+
+    <div class="bookmarklet-zone">
+      <a class="bookmarklet-btn" href="javascript:void((async function(){if(!window.jspdf){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';document.head.appendChild(s);await new Promise(r=>s.onload=r)}const{jsPDF}=window.jspdf;const u=new Set(),sl=ms=>new Promise(r=>setTimeout(r,ms));function c(){document.querySelectorAll('img').forEach(i=>{const s=i.src||'';if((s.includes('googleusercontent')||s.includes('lh3')||s.includes('ggpht'))&&i.naturalWidth>200)u.add(s)});document.querySelectorAll('[style*=&quot;background&quot;]').forEach(e=>{const b=getComputedStyle(e).backgroundImage;if(b&&b.includes('url(')){const m=b.match(/url\([&quot;'&#39;]?(.*?)\)[&quot;'&#39;]?/);if(m&&(m[1].includes('googleusercontent')||m[1].includes('lh3')))u.add(m[1])}})}const d=document.querySelector('.ndfHFb-c4YZDc-q77wJc')||document.querySelector('[role=document]')||document.body;let h=0;for(let i=0;i<300;i++){c();d.scrollBy(0,innerHeight*0.8);await sl(700);if(d.scrollHeight===h&&i>3)break;h=d.scrollHeight}d.scrollTo(0,0);await sl(500);c();const a=[...u].sort();const p=new jsPDF({unit:'px'});let f=true;for(let i=0;i<a.length;i++){try{const b=await fetch(a[i]).then(r=>r.blob());const du=await new Promise((rs,rj)=>{const fr=new FileReader();fr.onload=()=>rs(fr.result);fr.onerror=rj;fr.readAsDataURL(b)});const im=new Image();im.src=du;await new Promise(r=>im.onload=r);const w=im.naturalWidth,h2=im.naturalHeight;if(f){p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2);f=false}else{p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2)}}catch(e){}}if(p.getNumberOfPages()>1)p.deletePage(1);p.save('documento_baixado.pdf')})());">
+        &#128193; Baixar PDF do Drive
+      </a>
+      <p style="margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+        Arraste este bot&atilde;o para a barra de favoritos
+      </p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <p>Abra o PDF no Google Drive</p>
+        <span class="hint">Acesse o link do PDF e espere carregar por completo</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <p>Clique no favorito que voc&ecirc; criou</p>
+        <span class="hint">O script vai rolar o documento sozinho, baixar as p&aacute;ginas e salvar o arquivo <strong>documento_baixado.pdf</strong> automaticamente. N&atilde;o feche a aba.</span>
+      </div>
+    </div>
+
+    <div class="how-to-image">
+      <strong>N&atilde;o consegui arrastar?</strong> Como alternativa:
+      <ul>
+        <li>Clique com o bot&atilde;o direito na barra de favoritos e escolha "Adicionar p&aacute;gina..."</li>
+        <li>No campo <strong>Nome</strong>, digite: <strong>Baixar PDF do Drive</strong></li>
+        <li>Clique no bot&atilde;o "Copiar" abaixo, cole no campo <strong>URL</strong> e salve</li>
+      </ul>
     </div>
 
     <div class="code-block">
       <button class="btn btn-copy" onclick="copyScript('bookmarklet-code', this)">Copiar</button>
-      <pre id="bookmarklet-code">javascript:(async function(){const u=new Set(),s=ms=>new Promise(r=>setTimeout(r,ms));function c(){document.querySelectorAll('img').forEach(i=>{const s=i.src||'';if((s.includes('googleusercontent')||s.includes('lh3')||s.includes('ggpht'))&&i.naturalWidth>200)u.add(s)});document.querySelectorAll('[style*="background"]').forEach(e=>{const b=getComputedStyle(e).backgroundImage;if(b&&b.includes('url(')){const m=b.match(/url\(["']?(.*?)["']?\)/);if(m&&(m[1].includes('googleusercontent')||m[1].includes('lh3')))u.add(m[1])}})}const d=document.querySelector('.ndfHFb-c4YZDc-q77wJc')||document.querySelector('[role="document"]')||document.body;let h=0;for(let i=0;i<200;i++){c();d.scrollBy(0,innerHeight*0.8);await s(700);if(d.scrollHeight===h&&i>3)break;h=d.scrollHeight}d.scrollTo(0,0);await s(500);c();const a=[...u].sort();console.log(a.length+' paginas');a.forEach((url,i)=>{setTimeout(()=>{fetch(url).then(r=>r.blob()).then(b=>{const l=document.createElement('a');l.href=URL.createObjectURL(b);l.download='pagina_'+String(i+1).padStart(3,'0')+'.png';l.click();URL.revokeObjectURL(l.href)}).catch(()=>{const l=document.createElement('a');l.href=url;l.download='pagina_'+String(i+1).padStart(3,'0')+'.png';l.target='_blank';l.click()})},i*400)})})();</pre>
+      <pre id="bookmarklet-code">javascript:void((async function(){if(!window.jspdf){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';document.head.appendChild(s);await new Promise(r=>s.onload=r)}const{jsPDF}=window.jspdf;const u=new Set(),sl=ms=>new Promise(r=>setTimeout(r,ms));function c(){document.querySelectorAll('img').forEach(i=>{const s=i.src||'';if((s.includes('googleusercontent')||s.includes('lh3')||s.includes('ggpht'))&&i.naturalWidth>200)u.add(s)});document.querySelectorAll('[style*="background"]').forEach(e=>{const b=getComputedStyle(e).backgroundImage;if(b&&b.includes('url(')){const m=b.match(/url\(["']?(.*?)["']?\)/);if(m&&(m[1].includes('googleusercontent')||m[1].includes('lh3')))u.add(m[1])}})}const d=document.querySelector('.ndfHFb-c4YZDc-q77wJc')||document.querySelector('[role="document"]')||document.body;let h=0;for(let i=0;i<300;i++){c();d.scrollBy(0,innerHeight*0.8);await sl(700);if(d.scrollHeight===h&&i>3)break;h=d.scrollHeight}d.scrollTo(0,0);await sl(500);c();const a=[...u].sort();const p=new jsPDF({unit:'px'});let f=true;for(let i=0;i<a.length;i++){try{const b=await fetch(a[i]).then(r=>r.blob());const du=await new Promise((rs,rj)=>{const fr=new FileReader();fr.onload=()=>rs(fr.result);fr.onerror=rj;fr.readAsDataURL(b)});const im=new Image();im.src=du;await new Promise(r=>im.onload=r);const w=im.naturalWidth,h2=im.naturalHeight;if(f){p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2);f=false}else{p.addPage([w,h2]);p.addImage(du,'PNG',0,0,w,h2)}}catch(e){}}if(p.getNumberOfPages()>1)p.deletePage(1);p.save('documento_baixado.pdf')})());</pre>
     </div>
     <span class="feedback" id="fb-bookmarklet-code">C&oacute;digo copiado!</span>
-
-    <div class="step" style="margin-top: 24px;">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <p>Abra o PDF no Google Drive e clique no favorito</p>
-        <span class="hint">O script far&aacute; o scroll autom&aacute;tico e baixar&aacute; as p&aacute;ginas</span>
-      </div>
-    </div>
   </div>
 
   <div class="divider"></div>
 
   <div class="alert alert-warn">
-    <strong>Observa&ccedil;&otilde;es:</strong>
-    <ul style="margin: 8px 0 0 20px; font-size: 12px;">
-      <li>O script baixa cada p&aacute;gina como imagem PNG (n&atilde;o como PDF unificado)</li>
-      <li>O scroll autom&aacute;tico pode levar alguns minutos em documentos longos</li>
-      <li>N&atilde;o feche a aba durante o processo</li>
-      <li>Para juntar as PNGs em um &uacute;nico PDF, use um site como ilovepdf.com ou o comando <code>convert *.pdf</code> no terminal</li>
+    <strong>Importante saber:</strong>
+    <ul>
+      <li>O script rola o documento automaticamente &mdash; pode levar alguns minutos em documentos longos</li>
+      <li>N&atilde;o feche a aba do navegador durante o processo</li>
+      <li>O resultado final &eacute; um &uacute;nico arquivo <strong>documento_baixado.pdf</strong> com todas as p&aacute;ginas</li>
+      <li>As p&aacute;ginas s&atilde;o salvas como imagens dentro do PDF (n&atilde;o como texto selecion&aacute;vel)</li>
     </ul>
   </div>
 </div>
@@ -321,7 +464,7 @@
       document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
       tab.classList.add('active');
-      document.querySelector(`.method-panel[data-method="${method}"]`).classList.add('active');
+      document.querySelector('.method-panel[data-method="' + method + '"]').classList.add('active');
     });
   });
 
