@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baixar PDF do Google Drive (Somente Leitura)</title>
+<style>
+  :root {
+    --primary: #005C40;
+    --primary-dark: #004433;
+    --bg: #f0f2f5;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #666;
+    --border: #e0e0e0;
+    --success: #28a745;
+    --error: #dc3545;
+    --code-bg: #1e1e1e;
+    --code-text: #d4d4d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .container {
+    background: var(--card);
+    max-width: 680px;
+    width: 100%;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    border-top: 6px solid var(--primary);
+  }
+  h1 {
+    color: var(--primary);
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .step-content { flex: 1; }
+  .step-content p { font-size: 14px; color: var(--text); margin-bottom: 4px; }
+  .step-content .hint { font-size: 12px; color: var(--text-muted); }
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    position: relative;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    color: var(--code-text);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn:hover { background: var(--primary-dark); }
+  .btn:active { transform: scale(0.97); }
+  .btn-copy {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+  .alert {
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .alert-info {
+    background: #e8f5e9;
+    border: 1px solid #c8e6c9;
+    color: #2e7d32;
+  }
+  .alert-warn {
+    background: #fff3e0;
+    border: 1px solid #ffe0b2;
+    color: #e65100;
+  }
+  .feedback {
+    display: none;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--success);
+    font-weight: 600;
+  }
+  .feedback.show { display: block; }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+  .method-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .method-tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border: 2px solid var(--border);
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .method-tab.active {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: #e8f5ee;
+  }
+  .method-panel { display: none; }
+  .method-panel.active { display: block; }
+  kbd {
+    background: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Baixar PDF do Google Drive (Somente Leitura)</h1>
+  <p class="subtitle">Ferramenta para baixar PDFs que estão em modo visualização apenas</p>
+
+  <div class="alert alert-info">
+    Use esta ferramenta apenas em documentos que voc&ecirc; tem permiss&atilde;o leg&iacute;tima de visualiza&ccedil;&atilde;o. O conte&uacute;do j&aacute; est&aacute; vis&iacute;vel na sua tela &mdash; este script apenas salva localmente o que voc&ecirc; j&aacute; pode ver.
+  </div>
+
+  <div class="method-tabs">
+    <div class="method-tab active" data-method="console">M&eacute;todo 1: Console</div>
+    <div class="method-tab" data-method="bookmarklet">M&eacute;todo 2: Bookmarklet</div>
+  </div>
+
+  <!-- MÉTODO 1: CONSOLE -->
+  <div class="method-panel active" data-method="console">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <p>Abra o PDF no Google Drive</p>
+        <span class="hint">Acesse o link do PDF e aguarde carregar completamente</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p>Abra o Console do navegador</p>
+        <span class="hint">Pressione <kbd>F12</kbd> ou <kbd>Ctrl+Shift+J</kbd> (Chrome) / <kbd>Ctrl+Shift+K</kbd> (Firefox)</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <p>Cole o script abaixo no Console e pressione <kbd>Enter</kbd></p>
+        <span class="hint">O script ir&aacute; rolar o documento, coletar todas as p&aacute;ginas e baix&aacute;-las como imagens PNG</span>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <button class="btn btn-copy" onclick="copyScript('console-script', this)">Copiar</button>
+      <pre id="console-script">(async function(){
+  const urls = new Set();
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  function collect() {
+    document.querySelectorAll('img').forEach(img => {
+      const s = img.src || '';
+      if ((s.includes('googleusercontent') || s.includes('lh3') || s.includes('ggpht')) && img.naturalWidth > 200) {
+        urls.add(s);
+      }
+    });
+    document.querySelectorAll('[style*="background"]').forEach(el => {
+      const bg = getComputedStyle(el).backgroundImage;
+      if (bg && bg.includes('url(')) {
+        const m = bg.match(/url\(["']?(.*?)["']?\)/);
+        if (m && (m[1].includes('googleusercontent') || m[1].includes('lh3'))) urls.add(m[1]);
+      }
+    });
+  }
+
+  const container = document.querySelector('.ndfHFb-c4YZDc-q77wJc')
+    || document.querySelector('[role="document"]')
+    || document.body;
+  let lastH = 0;
+
+  for (let i = 0; i < 200; i++) {
+    collect();
+    container.scrollBy(0, window.innerHeight * 0.8);
+    await sleep(700);
+    if (container.scrollHeight === lastH && i > 3) break;
+    lastH = container.scrollHeight;
+  }
+
+  container.scrollTo(0, 0);
+  await sleep(500);
+  collect();
+
+  const arr = [...urls].sort();
+  console.log('Encontradas ' + arr.length + ' paginas. Baixando...');
+
+  arr.forEach((url, i) => {
+    setTimeout(() => {
+      fetch(url).then(r => r.blob()).then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'pagina_' + String(i+1).padStart(3,'0') + '.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }).catch(() => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pagina_' + String(i+1).padStart(3,'0') + '.png';
+        a.target = '_blank';
+        a.click();
+      });
+    }, i * 400);
+  });
+})();</pre>
+    </div>
+    <span class="feedback" id="fb-console-script">Script copiado!</span>
+  </div>
+
+  <!-- MÉTODO 2: BOOKMARKLET -->
+  <div class="method-panel" data-method="bookmarklet">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <p>Arraste o bot&atilde;o abaixo para a barra de favoritos do navegador</p>
+        <span class="hint">Crie um favorito e cole o c&oacute;digo no campo URL</span>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <button class="btn btn-copy" onclick="copyScript('bookmarklet-code', this)">Copiar</button>
+      <pre id="bookmarklet-code">javascript:(async function(){const u=new Set(),s=ms=>new Promise(r=>setTimeout(r,ms));function c(){document.querySelectorAll('img').forEach(i=>{const s=i.src||'';if((s.includes('googleusercontent')||s.includes('lh3')||s.includes('ggpht'))&&i.naturalWidth>200)u.add(s)});document.querySelectorAll('[style*="background"]').forEach(e=>{const b=getComputedStyle(e).backgroundImage;if(b&&b.includes('url(')){const m=b.match(/url\(["']?(.*?)["']?\)/);if(m&&(m[1].includes('googleusercontent')||m[1].includes('lh3')))u.add(m[1])}})}const d=document.querySelector('.ndfHFb-c4YZDc-q77wJc')||document.querySelector('[role="document"]')||document.body;let h=0;for(let i=0;i<200;i++){c();d.scrollBy(0,innerHeight*0.8);await s(700);if(d.scrollHeight===h&&i>3)break;h=d.scrollHeight}d.scrollTo(0,0);await s(500);c();const a=[...u].sort();console.log(a.length+' paginas');a.forEach((url,i)=>{setTimeout(()=>{fetch(url).then(r=>r.blob()).then(b=>{const l=document.createElement('a');l.href=URL.createObjectURL(b);l.download='pagina_'+String(i+1).padStart(3,'0')+'.png';l.click();URL.revokeObjectURL(l.href)}).catch(()=>{const l=document.createElement('a');l.href=url;l.download='pagina_'+String(i+1).padStart(3,'0')+'.png';l.target='_blank';l.click()})},i*400)})})();</pre>
+    </div>
+    <span class="feedback" id="fb-bookmarklet-code">C&oacute;digo copiado!</span>
+
+    <div class="step" style="margin-top: 24px;">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <p>Abra o PDF no Google Drive e clique no favorito</p>
+        <span class="hint">O script far&aacute; o scroll autom&aacute;tico e baixar&aacute; as p&aacute;ginas</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="alert alert-warn">
+    <strong>Observa&ccedil;&otilde;es:</strong>
+    <ul style="margin: 8px 0 0 20px; font-size: 12px;">
+      <li>O script baixa cada p&aacute;gina como imagem PNG (n&atilde;o como PDF unificado)</li>
+      <li>O scroll autom&aacute;tico pode levar alguns minutos em documentos longos</li>
+      <li>N&atilde;o feche a aba durante o processo</li>
+      <li>Para juntar as PNGs em um &uacute;nico PDF, use um site como ilovepdf.com ou o comando <code>convert *.pdf</code> no terminal</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.method-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const method = tab.dataset.method;
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.method-panel[data-method="${method}"]`).classList.add('active');
+    });
+  });
+
+  function copyScript(id, btn) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const fb = document.getElementById('fb-' + id);
+      fb.classList.add('show');
+      btn.textContent = 'Copiado!';
+      setTimeout(() => {
+        fb.classList.remove('show');
+        btn.textContent = 'Copiar';
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
